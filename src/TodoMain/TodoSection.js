@@ -66,6 +66,7 @@ function TodoSection() {
     }
 
     function deleteRequest (id) {
+        // await axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
         axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
         .then(() => {
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
