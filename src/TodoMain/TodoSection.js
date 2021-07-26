@@ -40,7 +40,9 @@ function TodoSection() {
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
 
-    
+
+
+//REST API
     function postRequest (task) {
         axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
         .then(response => {
@@ -54,13 +56,25 @@ function TodoSection() {
         .catch(response => console.log('It is wrong code!!!!!', response))
     }
 
-    function getRequest (func) {
+    function getRequest () {
         axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2')
         .then(res => {
-            func(res.data)
-            console.log(res.data)
+            setTodos(res.data)
+            setFilterTodos([...todos])
+            console.log(res.data.map(item => item.name))
         })
     }
+
+    function deleteRequest (id) {
+        axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
+        .then(() => {
+            setTodos([...todos.filter(todo => todo.uuid !== id) ])
+            setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
+        })
+        .catch(res => console.log(`Troubles with delete task: ${res}`))
+    }
+
+
 
 
 
@@ -83,23 +97,20 @@ function TodoSection() {
 
     
 
-    
-
-
 
 //Hook useEffect
     useEffect(() => {
-        getRequest(sliceTodosList)
-        console.log('it"s working')
+        getRequest()
+        console.log('it"s working: ', todos.length)
     }, [currentPage])
 
     useEffect (() => {
         if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
             setCurrentPage(currentPage - 1)
-            sliceTodosList(todos)
+            getRequest(todos)
         } 
         else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
-            sliceTodosList(todos)
+            getRequest(todos)
         }
     }, [filterTodos.length])
 
@@ -118,8 +129,9 @@ function TodoSection() {
     }
 
     function handleDeleteToDo (itemId) {
-        setFilterTodos([...filterTodos.filter(todo => todo.id !== itemId) ])
-        setTodos([...todos.filter(todo => todo.id !== itemId) ])
+        deleteRequest(itemId)
+        // setFilterTodos([...filterTodos.filter(todo => todo.id !== itemId) ])
+        // setTodos([...todos.filter(todo => todo.id !== itemId) ])
     }
     
 
@@ -239,11 +251,11 @@ function handleClickEnter (event, newTitle, task) {
                                 todoDelete={handleDeleteToDo}
                                 classItem={todo.class}
                                 todo={todo} 
-                                key={todo.uuid}
                                 clickEnter={handleClickEnter}
                                 clickForm={handleClickForm}
                                 clickEsc={handleClickEsc}
                                 boolVal={boolVal}
+                                id={todo.uuid}
                             />
                     })
                 }

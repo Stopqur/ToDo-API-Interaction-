@@ -3,7 +3,7 @@ import Quantity from './Quantity'
 import Sort from './Sort'
 import { Box } from '@material-ui/core';
 
-export default function Options ({filterAll, filterDone, filterUndone, sortTodosEarlier, sortTodosLater}) {
+export default function Options ({filterAll, filterDone, filterUndone, sortTodosEarlier, sortTodosLater, deleteAllTasks}) {
 
     return (
     
@@ -12,6 +12,7 @@ export default function Options ({filterAll, filterDone, filterUndone, sortTodos
                 filterAllBtn={filterAll} 
                 filterDoneBtn={filterDone} 
                 filterUndoneBtn={filterUndone}
+                deleteAllTasks={deleteAllTasks}
             />
             <Sort 
                 sortBtnEarlier={sortTodosEarlier} 

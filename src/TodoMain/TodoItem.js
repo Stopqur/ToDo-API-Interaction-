@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal, textTask, key }) {
+export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal, id, textTask }) {
     
     const classes = useStyles();
 
@@ -38,8 +38,8 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
 
 
     return (
-        <ListItem>
-            <InputLabel htmlFor={todo.uuid} style={{display: 'flex'}}>
+        <ListItem key={id}>
+            <InputLabel htmlFor={todo.uuid} style={{display: 'flex', alignItems: 'center'}}>
                 <Checkbox
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
@@ -80,7 +80,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                 </form>
                 <Typography className={classes.dateText}>{todo.createdAt}</Typography>
             </InputLabel>
-            <Button startIcon={<DeleteOutlinedIcon />} onClick={() => todoDelete(todo.id)} type="button"></Button>
+            <Button startIcon={<DeleteOutlinedIcon />} onClick={() => todoDelete(todo.uuid)} type="button"></Button>
         </ListItem>
     )
 }   

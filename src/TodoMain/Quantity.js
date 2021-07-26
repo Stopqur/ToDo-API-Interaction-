@@ -2,7 +2,7 @@ import React from 'react'
 import QuantityBtn from './QuantityBtn'
 import { Box, Button } from '@material-ui/core';
 
-export default function Quantity ({filterAllBtn, filterDoneBtn, filterUndoneBtn}) {
+export default function Quantity ({filterAllBtn, filterDoneBtn, filterUndoneBtn, deleteAllTasks}) {
     return (
         <Box>
             <Button onClick={ () => filterAllBtn()} variant="contained" color="common" type="button">All</Button>
