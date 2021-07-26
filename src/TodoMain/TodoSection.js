@@ -7,6 +7,8 @@ import TodoForm from './TodoForm'
 import Options from './Options'
 import TodoItem from './TodoItem'
 import Pagination from './Pagination'
+import axios from 'axios'
+
 
 const useStyles = makeStyles(() => ({
     title: {
@@ -19,6 +21,10 @@ const useStyles = makeStyles(() => ({
 
 
 function TodoSection() {
+
+
+    
+
     const classes = useStyles();
 
     const [todos, setTodos] = useState([])
@@ -34,27 +40,56 @@ function TodoSection() {
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
 
+    
+    function postRequest (task) {
+        axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
+        .then(response => {
+            setTodos([...todos, response.data])
+            setFilterTodos([...todos, response.data])
+            if (filterTodos.length > 2) {
+                sliceTodosList(todos)
+            }
+            // console.log('Very pretty code!!!')
+        })
+        .catch(response => console.log('It is wrong code!!!!!', response))
+    }
+
+    function getRequest (func) {
+        axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2')
+        .then(res => {
+            func(res.data)
+            console.log(res.data)
+        })
+    }
+
+
+
+    const [textTask, setTextTask] = useState([])
+
+    console.log(filterTodos)
 
     function handleAddItem (userInput, funcDelete) {
         const newItem = {
-            id: Date.now(),
-            title: userInput,
-            completed: false,
-            date: new Date()
+            name: userInput,
+            done: false,
         }
+        
+        postRequest (newItem)
+        console.log('Response: ', newItem)
         funcDelete('')
-        setTodos([...todos, newItem])
-        setFilterTodos([...todos, newItem])
-        if (filterTodos.length > 2) {
-            sliceTodosList(todos)
-        }
+        
     }
+
+
+    
+
+    
 
 
 
 //Hook useEffect
     useEffect(() => {
-        sliceTodosList(todos)
+        getRequest(sliceTodosList)
         console.log('it"s working')
     }, [currentPage])
 
@@ -75,8 +110,8 @@ function TodoSection() {
 //Action definite Todo item    
     function completeTodo (id) {
         setFilterTodos([...filterTodos.map(todo => {
-            if (todo.id === id) {
-                todo.completed = !todo.completed
+            if (todo.uuid === id) {
+                todo.done = !todo.done
                 return todo
             } return todo
         })])
@@ -95,18 +130,16 @@ function TodoSection() {
     const firstIdTask = lastIdTask - countTodoOnPage
 
     function handleFilterAll () {
-        setFlagHideBtn(false)
-        sliceTodosList(todos)
-        console.log(filterTodos.length)
+        getRequest(sliceTodosList)
     }
 
     function handleFilterDone () {
-        setFilterTodos(todos.filter(todo => todo.completed === true).slice(firstIdTask, lastIdTask))
+        setFilterTodos(todos.filter(todo => todo.done === true).slice(firstIdTask, lastIdTask))
         handleHidePagi()
     }
 
     function handleFilterUndone () {
-        setFilterTodos(todos.filter(todo => todo.completed === false).slice(firstIdTask, lastIdTask))
+        setFilterTodos(todos.filter(todo => todo.done === false).slice(firstIdTask, lastIdTask))
         handleHidePagi()
     }
 
@@ -199,14 +232,14 @@ function handleClickEnter (event, newTitle, task) {
                 filterDone={handleFilterDone}
             />
             <List>
-                {filterTodos.map((todo) => {
+                {filterTodos.map((todo,index) => {
                     return <TodoItem 
                                 completeTodo={completeTodo}
                                 style={{width: '100%'}}
                                 todoDelete={handleDeleteToDo}
                                 classItem={todo.class}
                                 todo={todo} 
-                                key={todo.id}
+                                key={todo.uuid}
                                 clickEnter={handleClickEnter}
                                 clickForm={handleClickForm}
                                 clickEsc={handleClickEsc}

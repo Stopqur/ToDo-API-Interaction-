@@ -1,7 +1,8 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { ListItem, InputLabel, Checkbox, Button, Box, Typography, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import axios from 'axios'
 
 const useStyles = makeStyles((theme) => ({
     title: {
@@ -19,13 +20,17 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal }) {
+
+
+
+export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal, textTask, key }) {
     
     const classes = useStyles();
 
     const [classItem, setClassItem] = useState('taskItem__text')
     
-    const [changeTitle, setChangeTitle] = useState(todo.title)
+    const [changeTitle, setChangeTitle] = useState(todo.name)
+
 
     function changeText (task, e ) {
         setChangeTitle(e.target.value)
@@ -34,13 +39,12 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
 
     return (
         <ListItem>
-            <InputLabel htmlFor={todo.id} style={{display: 'flex'}}>
+            <InputLabel htmlFor={todo.uuid} style={{display: 'flex'}}>
                 <Checkbox
-                    id={todo.id.toString()} 
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={() => completeTodo(todo.id)}
-                    checked={todo.completed}
+                    onChange={() => completeTodo(todo.uuid)}
+                    checked={todo.done}
                 />
                 {/* <Input
                     id={todo.id.toString()} 
@@ -74,7 +78,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                         }
                     </Box>
                 </form>
-                <Typography className={classes.dateText}>{todo.date.toLocaleString()}</Typography>
+                <Typography className={classes.dateText}>{todo.createdAt}</Typography>
             </InputLabel>
             <Button startIcon={<DeleteOutlinedIcon />} onClick={() => todoDelete(todo.id)} type="button"></Button>
         </ListItem>
