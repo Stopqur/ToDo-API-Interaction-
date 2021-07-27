@@ -43,7 +43,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                 <Checkbox
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={() => completeTodo(todo.uuid)}
+                    onChange={() => completeTodo(todo.uuid, todo)}
                     checked={todo.done}
                 />
                 <form 

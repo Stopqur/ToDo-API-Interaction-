@@ -50,7 +50,6 @@ function TodoSection() {
             const dataPOST = await axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
             setTodos([...todos, dataPOST.data])
             setFilterTodos([...todos, dataPOST.data])
-            sliceTodosList(dataPOST.data)
             console.log('Very pretty code!!!')
         } catch (err) {
             console.log('It is wrong code!!!!!', err)
@@ -60,8 +59,11 @@ function TodoSection() {
     const getRequest = async () => {
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy }})
+            const lastIdTask = currentPage * countTodoOnPage
+            const firstIdTask = lastIdTask - countTodoOnPage
             setTodos(dataGET.data)
             setFilterTodos(dataGET.data)
+            // setFilterTodos(dataGET.data.slice(firstIdTask, lastIdTask))
             console.log(dataGET.data.map(item => item.name))
         } catch (err) {
             console.log('GET function very bad written', err)
@@ -77,12 +79,11 @@ function TodoSection() {
              console.log(`Troubles with delete task: ${err}`)
         }
     }
-    const putRequest = async (id) => {
+    const putRequest = async (id, task) => {
         try {
-            const dataPUT = await axios(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: true})
-            // setFilterTodos(filterTodos.map(item => {
-            //     (item.uuid === id) ? console.log('This task', dataPUT) : console.log('Other task', dataPUT)
-            // }))
+            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done})
+            console.log('dataPUT', dataPUT.data)
+            
         } catch (err) {
             console.log('PUT trouble: ', err)
         }
@@ -91,6 +92,7 @@ function TodoSection() {
 
     function handleFilter (paramFilter) {
         setFilterBy(paramFilter)
+        console.log(filterBy)
     }
 
 
@@ -114,11 +116,14 @@ function TodoSection() {
 
 
 //Hook useEffect
-    // useEffect(() => {
-    //     getRequest()
-    //     console.log('it"s working: ', todos.length)
-    // }, [currentPage])
+    useEffect(() => {
+        getRequest()
+        console.log('it"s working: ', todos.length)
+    }, [currentPage])
 
+    useEffect(() => {
+
+    }, )
     // useEffect (() => {
     //     if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
     //         setCurrentPage(currentPage - 1)
@@ -134,8 +139,9 @@ function TodoSection() {
 
 
 //Action definite Todo item    
-    function completeTodo (id) {
-        putRequest(id)
+    function completeTodo (id, task) {
+        putRequest(id, task)
+        getRequest()
     }
 
     function handleDeleteToDo (itemId) {
@@ -153,6 +159,7 @@ function TodoSection() {
 
     function handleFilterAll () {
         getRequest()
+        console.log()
     }
 
     function handleFilterDone () {
