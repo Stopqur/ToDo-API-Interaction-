@@ -55,8 +55,8 @@ function TodoSection() {
         }
     }
 
-    
-    const getRequest = useCallback(async () => {
+
+    const getRequest = async () => {
         console.log('it is realy filterBy in getrequest', currentPage)
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy }})
@@ -65,7 +65,17 @@ function TodoSection() {
         } catch (err) {
             console.log('GET function very bad written', err)
         }
-    }, [filterBy, filterTodos])
+    }
+    // const getRequest = useCallback(async () => {
+    //     console.log('it is realy filterBy in getrequest', currentPage)
+    //     try {
+    //         const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy }})
+    //         setTodos(dataGET.data)
+    //         console.log(dataGET.data.map(item => item.name))
+    //     } catch (err) {
+    //         console.log('GET function very bad written', err)
+    //     }
+    // }, [filterBy, filterTodos])
 
 
     const deleteRequest = async (id) => {
@@ -103,7 +113,7 @@ function TodoSection() {
 
 //Hook useEffect
     useEffect(() => {
-        sliceTodosList()
+        setFilterTodos(todos.slice(currentPage * 3 - 3, currentPage * 3))
         console.log('it"s working: ', todos.length)
     }, [currentPage])
 
@@ -113,7 +123,7 @@ function TodoSection() {
             getRequest(todos)
         } 
         else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
-            getRequest(todos)
+            setFilterTodos(todos.slice(currentPage * 3 - 3, currentPage * 3))
         }
     }, [filterTodos.length])
 
