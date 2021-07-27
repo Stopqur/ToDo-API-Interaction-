@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Typography, Button, Box, List } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -35,11 +35,10 @@ function TodoSection() {
     console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
-    function sliceTodosList(arrTodo) {
+    function sliceTodosList() {
         const lastIdTask = currentPage * countTodoOnPage
         const firstIdTask = lastIdTask - countTodoOnPage
-        setTodos(arrTodo.slice(firstIdTask, lastIdTask))
-        setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
+        setFilterTodos(todos.slice(firstIdTask, lastIdTask))
     }
 
 
@@ -49,26 +48,25 @@ function TodoSection() {
         try {
             const dataPOST = await axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
             setTodos([...todos, dataPOST.data])
-            setFilterTodos([...todos, dataPOST.data])
+            sliceTodosList()
             console.log('Very pretty code!!!')
         } catch (err) {
             console.log('It is wrong code!!!!!', err)
         }
     }
 
-    const getRequest = async () => {
+    
+    const getRequest = useCallback(async () => {
+        console.log('it is realy filterBy in getrequest', currentPage)
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy }})
-            const lastIdTask = currentPage * countTodoOnPage
-            const firstIdTask = lastIdTask - countTodoOnPage
             setTodos(dataGET.data)
-            setFilterTodos(dataGET.data)
-            // setFilterTodos(dataGET.data.slice(firstIdTask, lastIdTask))
             console.log(dataGET.data.map(item => item.name))
         } catch (err) {
             console.log('GET function very bad written', err)
         }
-    }
+    }, [filterBy, filterTodos])
+
 
     const deleteRequest = async (id) => {
         try {
@@ -83,22 +81,11 @@ function TodoSection() {
         try {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done})
             console.log('dataPUT', dataPUT.data)
-            
         } catch (err) {
             console.log('PUT trouble: ', err)
         }
     }
 
-
-    function handleFilter (paramFilter) {
-        setFilterBy(paramFilter)
-        console.log(filterBy)
-    }
-
-
-    const [textTask, setTextTask] = useState([])
-
-    console.log(filterTodos, todos)
 
     function handleAddItem (userInput, funcDelete) {
         const newItem = {
@@ -106,7 +93,6 @@ function TodoSection() {
             done: false,
         }
         postRequest (newItem)
-        sliceTodosList(todos)
         console.log('Response!!! ', 'setTodos:', todos.length, 'filterTodos:', filterTodos.length)
         funcDelete('')
     }
@@ -117,22 +103,19 @@ function TodoSection() {
 
 //Hook useEffect
     useEffect(() => {
-        getRequest()
+        sliceTodosList()
         console.log('it"s working: ', todos.length)
     }, [currentPage])
 
-    useEffect(() => {
-
-    }, )
-    // useEffect (() => {
-    //     if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
-    //         setCurrentPage(currentPage - 1)
-    //         getRequest(todos)
-    //     } 
-    //     else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
-    //         getRequest(todos)
-    //     }
-    // }, [filterTodos.length])
+    useEffect (() => {
+        if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
+            setCurrentPage(currentPage - 1)
+            getRequest(todos)
+        } 
+        else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
+            getRequest(todos)
+        }
+    }, [filterTodos.length])
 
 
 
@@ -146,20 +129,24 @@ function TodoSection() {
 
     function handleDeleteToDo (itemId) {
         deleteRequest(itemId)
-        // setFilterTodos([...filterTodos.filter(todo => todo.id !== itemId) ])
-        // setTodos([...todos.filter(todo => todo.id !== itemId) ])
     }
     
 
 
 
 // Filtration
+    function handleFilter (paramFilter) {
+        setFilterBy(paramFilter)
+        getRequest()
+    }
+    console.log(filterBy)
+
+    
     const lastIdTask = currentPage * countTodoOnPage
     const firstIdTask = lastIdTask - countTodoOnPage
 
     function handleFilterAll () {
         getRequest()
-        console.log()
     }
 
     function handleFilterDone () {
