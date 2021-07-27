@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal, id, textTask }) {
+export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal, textTask }) {
     
     const classes = useStyles();
 
@@ -38,7 +38,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
 
 
     return (
-        <ListItem key={id}>
+        <ListItem >
             <InputLabel htmlFor={todo.uuid} style={{display: 'flex', alignItems: 'center'}}>
                 <Checkbox
                     value="checkedA"
@@ -46,13 +46,6 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                     onChange={() => completeTodo(todo.uuid)}
                     checked={todo.done}
                 />
-                {/* <Input
-                    id={todo.id.toString()} 
-                    type="checkbox" 
-                    onChange={() => completeTodo(todo.id)}
-                    checked={todo.completed}
-                >
-                </Input> */}
                 <form 
                     className={classes.root}
                     onDoubleClick={() => clickForm()}
@@ -60,7 +53,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                 >
                     <Box width='608px' p={2} >
                         { (boolVal) 
-                        ? <Typography className={classes.title} >{changeTitle}</Typography>
+                        ? <Typography className={classes.title} >{`${changeTitle}, ${todo.done}`}</Typography>
                         : <TextField 
                             className={classes.input}
                             onKeyPress={(e) => clickEnter(e, changeTitle, todo, setChangeTitle)} 
@@ -78,7 +71,8 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                         }
                     </Box>
                 </form>
-                <Typography className={classes.dateText}>{todo.createdAt}</Typography>
+                                                        {/* {todo.createdAt.slice(0, 10) + ', time: ' + todo.createdAt.slice(12, 19)} */}
+                <Typography className={classes.dateText}>{`${todo.createdAt.slice(0, 10)}, time: ${todo.createdAt.slice(12, 19)}`}</Typography>
             </InputLabel>
             <Button startIcon={<DeleteOutlinedIcon />} onClick={() => todoDelete(todo.uuid)} type="button"></Button>
         </ListItem>

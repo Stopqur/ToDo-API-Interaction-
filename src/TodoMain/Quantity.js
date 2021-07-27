@@ -2,12 +2,12 @@ import React from 'react'
 import QuantityBtn from './QuantityBtn'
 import { Box, Button } from '@material-ui/core';
 
-export default function Quantity ({filterAllBtn, filterDoneBtn, filterUndoneBtn, deleteAllTasks}) {
+export default function Quantity ({filterAllBtn, filterDoneBtn, filterUndoneBtn, filterMethod}) {
     return (
         <Box>
-            <Button onClick={ () => filterAllBtn()} variant="contained" color="common" type="button">All</Button>
-            <Button onClick={ () => filterDoneBtn()} variant="contained" color="common" style={ { marginLeft: '20px'}} type="button">Done</Button>
-            <Button onClick={ () => filterUndoneBtn()} variant="contained" color="common" style={ { marginLeft: '20px'}} type="button">Undone</Button>
+            <Button onClick={ () => filterMethod('')} variant="contained" type="button">All</Button>
+            <Button onClick={ () => filterMethod('done')} variant="contained" style={ { marginLeft: '20px'}} type="button">Done</Button>
+            <Button onClick={ () => filterMethod('undone')} variant="contained" style={ { marginLeft: '20px'}} type="button">Undone</Button>
         </Box>
     )
 }

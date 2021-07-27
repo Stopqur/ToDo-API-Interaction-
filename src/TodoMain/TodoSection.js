@@ -31,68 +31,82 @@ function TodoSection() {
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [flagHideBtn, setFlagHideBtn] = useState(false)
+    const [filterBy, setFilterBy] = useState('')
     console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
     function sliceTodosList(arrTodo) {
         const lastIdTask = currentPage * countTodoOnPage
         const firstIdTask = lastIdTask - countTodoOnPage
+        setTodos(arrTodo.slice(firstIdTask, lastIdTask))
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
 
 
 
 //REST API
-    function postRequest (task) {
-        axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
-        .then(response => {
-            setTodos([...todos, response.data])
-            setFilterTodos([...todos, response.data])
-            if (filterTodos.length > 2) {
-                sliceTodosList(todos)
-            }
-            // console.log('Very pretty code!!!')
-        })
-        .catch(response => console.log('It is wrong code!!!!!', response))
+    const postRequest =  async (task) => {
+        try {
+            const dataPOST = await axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
+            setTodos([...todos, dataPOST.data])
+            setFilterTodos([...todos, dataPOST.data])
+            sliceTodosList(dataPOST.data)
+            console.log('Very pretty code!!!')
+        } catch (err) {
+            console.log('It is wrong code!!!!!', err)
+        }
     }
 
-    function getRequest () {
-        axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2')
-        .then(res => {
-            setTodos(res.data)
-            setFilterTodos([...todos])
-            console.log(res.data.map(item => item.name))
-        })
+    const getRequest = async () => {
+        try {
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy }})
+            setTodos(dataGET.data)
+            setFilterTodos(dataGET.data)
+            console.log(dataGET.data.map(item => item.name))
+        } catch (err) {
+            console.log('GET function very bad written', err)
+        }
     }
 
-    function deleteRequest (id) {
-        // await axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
-        axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
-        .then(() => {
+    const deleteRequest = async (id) => {
+        try {
+            await axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
             setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
-        })
-        .catch(res => console.log(`Troubles with delete task: ${res}`))
+        } catch (err) {
+             console.log(`Troubles with delete task: ${err}`)
+        }
+    }
+    const putRequest = async (id) => {
+        try {
+            const dataPUT = await axios(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: true})
+            // setFilterTodos(filterTodos.map(item => {
+            //     (item.uuid === id) ? console.log('This task', dataPUT) : console.log('Other task', dataPUT)
+            // }))
+        } catch (err) {
+            console.log('PUT trouble: ', err)
+        }
     }
 
 
-
+    function handleFilter (paramFilter) {
+        setFilterBy(paramFilter)
+    }
 
 
     const [textTask, setTextTask] = useState([])
 
-    console.log(filterTodos)
+    console.log(filterTodos, todos)
 
     function handleAddItem (userInput, funcDelete) {
         const newItem = {
             name: userInput,
             done: false,
         }
-        
         postRequest (newItem)
-        console.log('Response: ', newItem)
+        sliceTodosList(todos)
+        console.log('Response!!! ', 'setTodos:', todos.length, 'filterTodos:', filterTodos.length)
         funcDelete('')
-        
     }
 
 
@@ -100,20 +114,20 @@ function TodoSection() {
 
 
 //Hook useEffect
-    useEffect(() => {
-        getRequest()
-        console.log('it"s working: ', todos.length)
-    }, [currentPage])
+    // useEffect(() => {
+    //     getRequest()
+    //     console.log('it"s working: ', todos.length)
+    // }, [currentPage])
 
-    useEffect (() => {
-        if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
-            setCurrentPage(currentPage - 1)
-            getRequest(todos)
-        } 
-        else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
-            getRequest(todos)
-        }
-    }, [filterTodos.length])
+    // useEffect (() => {
+    //     if (filterTodos.length < 1 && todos.length !== 0 && currentPage !== 1) {
+    //         setCurrentPage(currentPage - 1)
+    //         getRequest(todos)
+    //     } 
+    //     else if (filterTodos.length < 1 && todos.length !== 0 && currentPage === 1) {
+    //         getRequest(todos)
+    //     }
+    // }, [filterTodos.length])
 
 
 
@@ -121,12 +135,7 @@ function TodoSection() {
 
 //Action definite Todo item    
     function completeTodo (id) {
-        setFilterTodos([...filterTodos.map(todo => {
-            if (todo.uuid === id) {
-                todo.done = !todo.done
-                return todo
-            } return todo
-        })])
+        putRequest(id)
     }
 
     function handleDeleteToDo (itemId) {
@@ -143,7 +152,7 @@ function TodoSection() {
     const firstIdTask = lastIdTask - countTodoOnPage
 
     function handleFilterAll () {
-        getRequest(sliceTodosList)
+        getRequest()
     }
 
     function handleFilterDone () {
@@ -243,20 +252,20 @@ function handleClickEnter (event, newTitle, task) {
                 filterAll={handleFilterAll} 
                 filterUndone={handleFilterUndone} 
                 filterDone={handleFilterDone}
+                filterMethod = {handleFilter}
             />
             <List>
                 {filterTodos.map((todo,index) => {
                     return <TodoItem 
+                                key={index}
                                 completeTodo={completeTodo}
                                 style={{width: '100%'}}
                                 todoDelete={handleDeleteToDo}
-                                classItem={todo.class}
                                 todo={todo} 
                                 clickEnter={handleClickEnter}
                                 clickForm={handleClickForm}
                                 clickEsc={handleClickEsc}
                                 boolVal={boolVal}
-                                id={todo.uuid}
                             />
                     })
                 }

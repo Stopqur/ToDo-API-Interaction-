@@ -12,7 +12,6 @@ function Pagination ({ btnSwitchPage, countTodoOnPage, countFilterTodo, classes 
         <Box display='flex' justifyContent='center'>
             {pageNum.map((btn, i) => {
                 return (
-                <Box mr={1}>
                     <Button 
                         variant="outlined" 
                         color="secondary"
@@ -21,7 +20,6 @@ function Pagination ({ btnSwitchPage, countTodoOnPage, countFilterTodo, classes 
                     >
                     {btn} 
                     </Button>
-                </Box>
                 )
             })}
         </Box>
