@@ -73,10 +73,14 @@ function TodoSection() {
             console.log(`Troubles with delete task: ${err}`)
         }
     }
-
+// function handleSortEarlier () {
+//         setFilterTodos(filterTodos.sort(function(a, b) {
+//             return b.id - a.id
+//         }))
+//     }
     const getRequest = async (valFilter) => {
         try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter }})
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: 'asc' }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
         } catch (err) {
@@ -101,6 +105,7 @@ function TodoSection() {
     const putRequest = async (id, task, newName) => {
         try {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done, name: newName})
+            // (task.done === true) ? getRequest('done') 
             getRequest()
         } catch (err) {
             setOpenBar(true)
@@ -144,8 +149,8 @@ function TodoSection() {
     }, [filterTodos.length])
 
     useEffect(() => {
-        console.log('safa')
-    })
+        getRequest()
+    }, TodoSection)
 
 
 

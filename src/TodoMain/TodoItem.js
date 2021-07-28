@@ -50,7 +50,10 @@ export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, cl
                 </Input> */}
                 <form 
                     className={classes.root}
-                    onDoubleClick={() => setBoolVal(false)}
+                    onDoubleClick={() => {
+                        setBoolVal(false)
+                        console.log(todo)
+                    }}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
                             clickEsc(e, todo, setChangeTitle)
