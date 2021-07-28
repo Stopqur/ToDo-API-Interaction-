@@ -26,7 +26,6 @@ function TodoSection() {
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [flagHideBtn, setFlagHideBtn] = useState(false)
-    const [filterMethod, setFilterMethod] = useState('')
     console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
@@ -65,10 +64,22 @@ function TodoSection() {
         }
     }
 
-    const getRequest = async (val) => {
+    const getRequest = async (valFilter) => {
         console.log('it is realy filterBy in getrequest')
         try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: val }})
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter }})
+            setTodos(dataGET.data)
+            sliceTodosList(dataGET.data)
+            console.log(dataGET.data)
+        } catch (err) {
+            console.log('GET function very bad written', err)
+        }
+    }
+
+    const getRequestSort = async (valSort) => {
+        console.log('it is realy filterBy in getrequest')
+        try {
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { order: valSort }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
             console.log(dataGET.data)
@@ -77,9 +88,9 @@ function TodoSection() {
         }
     }
     
-    const putRequest = async (id, task) => {
+    const putRequest = async (id, task, newName) => {
         try {
-            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done})
+            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done, name: newName})
             getRequest()
             console.log('dataPUT', dataPUT.data)
         } catch (err) {
@@ -133,7 +144,6 @@ function TodoSection() {
 //Action definite Todo item    
     function completeTodo (task) {
         putRequest(task.uuid, task)
-        getRequest()
     }
 
     function handleDeleteToDo (itemId) {
@@ -151,35 +161,12 @@ function TodoSection() {
 
 
 //Sort
-    function handleSortEarlier () {
-        setFilterTodos(filterTodos.sort(function(a, b) {
-            return b.id - a.id
-        }))
+    function handleSort (val) {
+        getRequestSort(val)
     }
-
-    function handleSortLater () {
-        setFilterTodos(filterTodos.sort(function(a, b) {
-            return a.id - b.id 
-        }))
-    }
-
-
 
 
 //Pagination 
-   // Hide pagination on length array less 3
-   function handleHidePagi () {
-        if(filterTodos.length < 3) {
-            setFlagHideBtn(true)
-            console.log(filterTodos.length)
-        } 
-        else {
-            setFlagHideBtn(false)
-            console.log(filterTodos.length)
-
-        }
-    }
-
     function handlePaginationBtn (num) {
         setCurrentPage(num)
         console.log('number of page: ', currentPage)
@@ -200,7 +187,7 @@ function handleClickForm () {
 function handleClickEsc (e, task, func) {
     if (e.key === 'Escape') {
         setFilterTodos([...filterTodos.map(todo => {
-            func(task.title)
+            func(task.name)
             // task.title = old
             return todo
         })])
@@ -210,10 +197,7 @@ function handleClickEsc (e, task, func) {
 
 function handleClickEnter (event, newTitle, task) {
     if(boolVal === false && event.key === 'Enter') {
-        setFilterTodos([...filterTodos.map(todo => {
-            task.title = newTitle
-            return todo
-        })])
+        putRequest(task.uuid, task, newTitle)
         setBoolVal(true)
         
     }
@@ -228,25 +212,26 @@ function handleClickEnter (event, newTitle, task) {
             <Typography className={ classes.title } variant='h3'>toDo List</Typography>
             <TodoForm addTodo={handleAddItem}></TodoForm>
             <Options 
-                sortTodosLater={handleSortLater} 
-                sortTodosEarlier={handleSortEarlier}
+                sortTodos={handleSort} 
                 filterMethod={handleFilterMethod}
             />
-            <List>
-                {filterTodos.map((todo) => {
-                    return <TodoItem 
-                                completeTodo={completeTodo}
-                                todoDelete={handleDeleteToDo}
-                                todo={todo} 
-                                key={todo.uuid}
-                                clickEnter={handleClickEnter}
-                                clickForm={handleClickForm}
-                                clickEsc={handleClickEsc}
-                                boolVal={boolVal}
-                            />
-                    })
-                }
-            </List>
+            <Box minHeight='280px'>
+                <List>
+                    {filterTodos.map((todo) => {
+                        return <TodoItem 
+                                    completeTodo={completeTodo}
+                                    todoDelete={handleDeleteToDo}
+                                    todo={todo} 
+                                    key={todo.uuid}
+                                    clickEnter={handleClickEnter}
+                                    clickForm={handleClickForm}
+                                    clickEsc={handleClickEsc}
+                                    boolVal={boolVal}
+                                />
+                        })
+                    }
+                </List>
+            </Box>
             {todos.length > 3 
             && 
             <Pagination 

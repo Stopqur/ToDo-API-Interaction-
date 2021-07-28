@@ -20,26 +20,25 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal }) {
-    
-    const classes = useStyles();
 
-    const [classItem, setClassItem] = useState('taskItem__text')
+    const classes = useStyles();
     
     const [changeTitle, setChangeTitle] = useState(todo.name)
 
-    function changeText (task, e ) {
+    function changeText ( todo, e ) {
         setChangeTitle(e.target.value)
     }
-
-
+    
     return (
         <ListItem>
-            <InputLabel htmlFor={todo.uuid} style={{display: 'flex', alignItems: 'center'}}>
+            <Box htmlFor={todo.uuid} style={{display: 'flex', alignItems: 'center'}}>
                 <Checkbox
                     id={todo.uuid} 
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={() => completeTodo(todo)}
+                    onChange={(e) => {
+                        return(e.key !== 'Enter') ? completeTodo(todo) : e.preventDefault()
+                    }}
                     checked={todo.done}
                 />
                 {/* <Input
@@ -62,7 +61,6 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                             onKeyPress={(e) => clickEnter(e, changeTitle, todo, setChangeTitle)} 
                             onChange={(e) => changeText(todo, e)} 
                             value={changeTitle} 
-                            id="outlined-basic" 
                             label="Outlined" 
                             variant="outlined"
                             InputProps={{
@@ -75,7 +73,7 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                     </Box>
                 </form>
                 <Typography className={classes.dateText}>{`${todo.createdAt.slice(0, 10)}, time: ${todo.createdAt.slice(11, 19)}`}</Typography>
-            </InputLabel>
+            </Box>
             <Button startIcon={<DeleteOutlinedIcon />} onClick={() => todoDelete(todo.uuid)} type="button"></Button>
         </ListItem>
     )
