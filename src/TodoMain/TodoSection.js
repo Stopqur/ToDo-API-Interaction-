@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import { Typography, Button, Box, List } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -7,6 +7,7 @@ import TodoForm from './TodoForm'
 import Options from './Options'
 import TodoItem from './TodoItem'
 import Pagination from './Pagination'
+import axios from 'axios'
 
 const useStyles = makeStyles(() => ({
     title: {
@@ -25,6 +26,7 @@ function TodoSection() {
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [flagHideBtn, setFlagHideBtn] = useState(false)
+    const [filterMethod, setFilterMethod] = useState('')
     console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
@@ -36,19 +38,71 @@ function TodoSection() {
 
 
 
+
+
+
+
     
+//REST API
+    const postRequest =  async (task) => {
+        try {
+            const dataPOST = await axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
+            setTodos([...todos, dataPOST.data])
+            setFilterTodos([...filterTodos, dataPOST.data].slice(currentPage * 3 - 3, currentPage * 3))
+            console.log('Very pretty code!!!', dataPOST)
+        } catch (err) {
+            console.log('It is wrong code!!!!!', err)
+        }
+    }
+
+    const deleteRequest = async (id) => {
+        try {
+            await axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
+            setTodos([...todos.filter(todo => todo.uuid !== id) ])
+            setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
+        } catch (err) {
+             console.log(`Troubles with delete task: ${err}`)
+        }
+    }
+
+    const getRequest = async (val) => {
+        console.log('it is realy filterBy in getrequest')
+        try {
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: val }})
+            setTodos(dataGET.data)
+            sliceTodosList(dataGET.data)
+            console.log(dataGET.data)
+        } catch (err) {
+            console.log('GET function very bad written', err)
+        }
+    }
     
+    const putRequest = async (id, task) => {
+        try {
+            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done})
+            getRequest()
+            console.log('dataPUT', dataPUT.data)
+        } catch (err) {
+            console.log('PUT trouble: ', err)
+        }
+    }
+
+
+
+
+
+
+
+
+
 
     function handleAddItem (userInput, funcDelete) {
         const newItem = {
-            id: Date.now(),
-            title: userInput,
-            completed: false,
-            date: new Date()
+            name: userInput,
+            done: false
         }
+        postRequest(newItem)
         funcDelete('')
-        setTodos([...todos, newItem])
-        setFilterTodos([...todos, newItem])
         if (filterTodos.length > 2) {
             sliceTodosList(todos)
         }
@@ -77,44 +131,22 @@ function TodoSection() {
 
 
 //Action definite Todo item    
-    function completeTodo (id) {
-        setFilterTodos([...filterTodos.map(todo => {
-            if (todo.id === id) {
-                todo.completed = !todo.completed
-                return todo
-            } return todo
-        })])
+    function completeTodo (task) {
+        putRequest(task.uuid, task)
+        getRequest()
     }
 
     function handleDeleteToDo (itemId) {
-        setFilterTodos([...filterTodos.filter(todo => todo.id !== itemId) ])
-        setTodos([...todos.filter(todo => todo.id !== itemId) ])
+        deleteRequest(itemId)
     }
     
 
 
 
 // Filtration
-    const lastIdTask = currentPage * countTodoOnPage
-    const firstIdTask = lastIdTask - countTodoOnPage
-
-    function handleFilterAll () {
-        setFlagHideBtn(false)
-        sliceTodosList(todos)
-        console.log(filterTodos.length)
+    const handleFilterMethod = (val) => {
+        getRequest(val)
     }
-
-    function handleFilterDone () {
-        setFilterTodos(todos.filter(todo => todo.completed === true).slice(firstIdTask, lastIdTask))
-        handleHidePagi()
-    }
-
-    function handleFilterUndone () {
-        setFilterTodos(todos.filter(todo => todo.completed === false).slice(firstIdTask, lastIdTask))
-        handleHidePagi()
-    }
-
-
 
 
 
@@ -197,20 +229,16 @@ function handleClickEnter (event, newTitle, task) {
             <TodoForm addTodo={handleAddItem}></TodoForm>
             <Options 
                 sortTodosLater={handleSortLater} 
-                sortTodosEarlier={handleSortEarlier} 
-                filterAll={handleFilterAll} 
-                filterUndone={handleFilterUndone} 
-                filterDone={handleFilterDone}
+                sortTodosEarlier={handleSortEarlier}
+                filterMethod={handleFilterMethod}
             />
             <List>
                 {filterTodos.map((todo) => {
                     return <TodoItem 
                                 completeTodo={completeTodo}
-                                style={{width: '100%'}}
                                 todoDelete={handleDeleteToDo}
-                                classItem={todo.class}
                                 todo={todo} 
-                                key={todo.id}
+                                key={todo.uuid}
                                 clickEnter={handleClickEnter}
                                 clickForm={handleClickForm}
                                 clickEsc={handleClickEsc}
@@ -230,29 +258,6 @@ function handleClickEnter (event, newTitle, task) {
             }
         </Box>
     )
-    // (
-        // <section className='main__menu'>
-        //     <TodoTitle />    
-        //     <TodoForm 
-        //         addTodo={handleAddItem} 
-        //         titleInput={titleInput} 
-        //         handleChangeInput={handleChangeInput} 
-        //         deleteInput={handleDeleteInput} 
-        //     />
-        //     <Options sortTodosLater={handleSortLater} sortTodosEarlier={handleSortEarlier} filterAll={handleFilterAll} filterUndone={handleFilterUndone} filterDone={handleFilterDone}/>
-        //     <ul className="main__taskList">
-        //         {filterTodos.map((todo, index) => {
-        //             return <TodoItem 
-        //                 number={index}
-        //                 todoDelete={handleDeleteToDo}
-        //                 todo={todo} 
-        //                 key={index}/>
-        //             })
-        //         }
-        //     </ul>
-        //     <Pagination btnSwitchPage={handlePaginationBtn} countTodos={todos.length} countTodoOnPage={countTodoOnPage}/>
-        // </section>
-    // )
 }
 
 export default TodoSection
