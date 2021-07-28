@@ -26,7 +26,7 @@ function TodoSection() {
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [flagHideBtn, setFlagHideBtn] = useState(false)
-    console.log(' ========= Render todoSection', todos)
+    // console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
     function sliceTodosList(arrTodo) {
@@ -34,10 +34,6 @@ function TodoSection() {
         const firstIdTask = lastIdTask - countTodoOnPage
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
-
-
-
-
 
 
 
@@ -51,6 +47,7 @@ function TodoSection() {
             console.log('Very pretty code!!!', dataPOST)
         } catch (err) {
             console.log('It is wrong code!!!!!', err)
+            alert('It is wrong code!!!!!', err)
         }
     }
 
@@ -60,31 +57,30 @@ function TodoSection() {
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
             setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
         } catch (err) {
-             console.log(`Troubles with delete task: ${err}`)
+            console.log(`Troubles with delete task: ${err}`)
+            alert(`Troubles with delete task: ${err}`)
         }
     }
 
     const getRequest = async (valFilter) => {
-        console.log('it is realy filterBy in getrequest')
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
-            console.log(dataGET.data)
         } catch (err) {
             console.log('GET function very bad written', err)
+            alert('GET function very bad written', err)
         }
     }
 
     const getRequestSort = async (valSort) => {
-        console.log('it is realy filterBy in getrequest')
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { order: valSort }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
-            console.log(dataGET.data)
         } catch (err) {
             console.log('GET function very bad written', err)
+            alert('GET function very bad written', err)
         }
     }
     
@@ -92,21 +88,16 @@ function TodoSection() {
         try {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done, name: newName})
             getRequest()
-            console.log('dataPUT', dataPUT.data)
         } catch (err) {
             console.log('PUT trouble: ', err)
+            alert('PUT trouble: ', err)
         }
     }
 
 
 
 
-
-
-
-
-
-
+//Form actions
     function handleAddItem (userInput, funcDelete) {
         const newItem = {
             name: userInput,
@@ -121,10 +112,10 @@ function TodoSection() {
 
 
 
+
 //Hook useEffect
     useEffect(() => {
         sliceTodosList(todos)
-        console.log('it"s working')
     }, [currentPage])
 
     useEffect (() => {
@@ -140,8 +131,9 @@ function TodoSection() {
 
 
 
-
 //Action definite Todo item    
+    const [boolVal, setBoolVal] = useState(true)
+
     function completeTodo (task) {
         putRequest(task.uuid, task)
     }
@@ -150,6 +142,29 @@ function TodoSection() {
         deleteRequest(itemId)
     }
     
+    function handleClickForm () {
+        setBoolVal(false)
+    }
+    
+    function handleClickEsc (e, task, func) {
+        if (e.key === 'Escape') {
+            setFilterTodos([...filterTodos.map(todo => {
+                func(task.name)
+                // task.title = old
+                return todo
+            })])
+            setBoolVal(true)
+        }
+    }
+    
+    function handleClickEnter (event, newTitle, task) {
+        if(boolVal === false && event.key === 'Enter') {
+            putRequest(task.uuid, task, newTitle)
+            setBoolVal(true)
+            
+        }
+    }
+
 
 
 
@@ -160,48 +175,20 @@ function TodoSection() {
 
 
 
+
 //Sort
     function handleSort (val) {
         getRequestSort(val)
     }
 
 
+
+
 //Pagination 
     function handlePaginationBtn (num) {
         setCurrentPage(num)
-        console.log('number of page: ', currentPage)
     }
 
-
-
-
-
-// Actions on definite task
-
-const [boolVal, setBoolVal] = useState(true)
-
-function handleClickForm () {
-    setBoolVal(false)
-}
-
-function handleClickEsc (e, task, func) {
-    if (e.key === 'Escape') {
-        setFilterTodos([...filterTodos.map(todo => {
-            func(task.name)
-            // task.title = old
-            return todo
-        })])
-        setBoolVal(true)
-    }
-}
-
-function handleClickEnter (event, newTitle, task) {
-    if(boolVal === false && event.key === 'Enter') {
-        putRequest(task.uuid, task, newTitle)
-        setBoolVal(true)
-        
-    }
-}
 
     
 
@@ -218,16 +205,18 @@ function handleClickEnter (event, newTitle, task) {
             <Box minHeight='280px'>
                 <List>
                     {filterTodos.map((todo) => {
-                        return <TodoItem 
-                                    completeTodo={completeTodo}
-                                    todoDelete={handleDeleteToDo}
-                                    todo={todo} 
-                                    key={todo.uuid}
-                                    clickEnter={handleClickEnter}
-                                    clickForm={handleClickForm}
-                                    clickEsc={handleClickEsc}
-                                    boolVal={boolVal}
-                                />
+                        return (
+                            <TodoItem 
+                                completeTodo={completeTodo}
+                                todoDelete={handleDeleteToDo}
+                                todo={todo} 
+                                key={todo.uuid}
+                                clickEnter={handleClickEnter}
+                                clickForm={handleClickForm}
+                                clickEsc={handleClickEsc}
+                                boolVal={boolVal}
+                            />
+                        )
                         })
                     }
                 </List>
