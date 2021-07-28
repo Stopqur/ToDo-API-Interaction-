@@ -1,5 +1,7 @@
 import React, {useState, useEffect, useCallback} from 'react'
-import { Typography, Button, Box, List } from '@material-ui/core';
+import { Typography, Button, Box, List, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+
 import { makeStyles } from '@material-ui/core/styles'
 
 import TodoTitle from './TodoTitle'
@@ -22,10 +24,20 @@ const useStyles = makeStyles(() => ({
 function TodoSection() {
     const classes = useStyles();
 
+    // const get = () => {
+    //     axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2')
+    //     .then(req => {
+    //         req.data
+    //         console.log(req.data)
+    //     }) 
+    // }
+    
     const [todos, setTodos] = useState([])
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [flagHideBtn, setFlagHideBtn] = useState(false)
+    const [trackBug, setTrackBug] = useState('')
+    const [openBar, setOpenBar] = useState(false);
     // console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
@@ -35,9 +47,7 @@ function TodoSection() {
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
 
-
-
-    
+  
 //REST API
     const postRequest =  async (task) => {
         try {
@@ -46,8 +56,9 @@ function TodoSection() {
             setFilterTodos([...filterTodos, dataPOST.data].slice(currentPage * 3 - 3, currentPage * 3))
             console.log('Very pretty code!!!', dataPOST)
         } catch (err) {
-            console.log('It is wrong code!!!!!', err)
-            alert('It is wrong code!!!!!', err)
+            setOpenBar(true)
+            setTrackBug(`${err}`)
+            console.log('It is wrong code!!!!!', typeof err)
         }
     }
 
@@ -57,8 +68,9 @@ function TodoSection() {
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
             setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
         } catch (err) {
+            setOpenBar(true)
+            setTrackBug(`${err}`)
             console.log(`Troubles with delete task: ${err}`)
-            alert(`Troubles with delete task: ${err}`)
         }
     }
 
@@ -68,8 +80,9 @@ function TodoSection() {
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
         } catch (err) {
+            setOpenBar(true)
+            setTrackBug(`${err}`)
             console.log('GET function very bad written', err)
-            alert('GET function very bad written', err)
         }
     }
 
@@ -79,8 +92,9 @@ function TodoSection() {
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
         } catch (err) {
+            setOpenBar(true)
+            setTrackBug(`${err}`)
             console.log('GET function very bad written', err)
-            alert('GET function very bad written', err)
         }
     }
     
@@ -89,8 +103,9 @@ function TodoSection() {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done, name: newName})
             getRequest()
         } catch (err) {
+            setOpenBar(true)
+            setTrackBug(`${err}`)
             console.log('PUT trouble: ', err)
-            alert('PUT trouble: ', err)
         }
     }
 
@@ -128,23 +143,23 @@ function TodoSection() {
         }
     }, [filterTodos.length])
 
+    useEffect(() => {
+        console.log('safa')
+    })
 
 
 
 //Action definite Todo item    
-    const [boolVal, setBoolVal] = useState(true)
 
-    function completeTodo (task) {
+    function handleTodoComplete (task) {
         putRequest(task.uuid, task)
     }
 
-    function handleDeleteToDo (itemId) {
-        deleteRequest(itemId)
+    const handleDeleteToDo = async (itemId) => {
+        await deleteRequest(itemId)
     }
     
-    function handleClickForm () {
-        setBoolVal(false)
-    }
+
     
     function handleClickEsc (e, task, func) {
         if (e.key === 'Escape') {
@@ -153,16 +168,11 @@ function TodoSection() {
                 // task.title = old
                 return todo
             })])
-            setBoolVal(true)
         }
     }
     
-    function handleClickEnter (event, newTitle, task) {
-        if(boolVal === false && event.key === 'Enter') {
-            putRequest(task.uuid, task, newTitle)
-            setBoolVal(true)
-            
-        }
+    function handleClickEnter (newTitle, task) {
+        putRequest(task.uuid, task, newTitle)
     }
 
 
@@ -188,10 +198,15 @@ function TodoSection() {
     function handlePaginationBtn (num) {
         setCurrentPage(num)
     }
-
-
     
 
+    const handleClose = (reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setOpenBar(false);
+    };
+      
 
 
     return (
@@ -207,14 +222,12 @@ function TodoSection() {
                     {filterTodos.map((todo) => {
                         return (
                             <TodoItem 
-                                completeTodo={completeTodo}
+                                todoComplete={handleTodoComplete}
                                 todoDelete={handleDeleteToDo}
                                 todo={todo} 
                                 key={todo.uuid}
                                 clickEnter={handleClickEnter}
-                                clickForm={handleClickForm}
                                 clickEsc={handleClickEsc}
-                                boolVal={boolVal}
                             />
                         )
                         })
@@ -230,6 +243,19 @@ function TodoSection() {
                 countFilterTodo={todos.length}
             />
             }
+            <Snackbar 
+                open={openBar} 
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                autoHideDuration={6000} 
+                onClose={handleClose}
+            >
+                <Alert onClose={handleClose} severity="error">
+                    {trackBug}
+                </Alert>
+            </Snackbar>
         </Box>
     )
 }

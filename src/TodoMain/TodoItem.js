@@ -19,11 +19,12 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, clickForm, clickEsc, boolVal }) {
+export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, clickEsc }) {
 
     const classes = useStyles();
     
     const [changeTitle, setChangeTitle] = useState(todo.name)
+    const [boolVal, setBoolVal] = useState(true)
 
     function changeText ( todo, e ) {
         setChangeTitle(e.target.value)
@@ -36,9 +37,8 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                     id={todo.uuid} 
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={(e) => {
-                        return(e.key !== 'Enter') ? completeTodo(todo) : e.preventDefault()
-                    }}
+                    onChange={(e) => (e.key === 'Enter') ? e.preventDefault() : todoComplete(todo)}
+                    onKeyPress={(e) => (e.key === 'Enter') ? e.preventDefault(): console.log('sfsfs')}
                     checked={todo.done}
                 />
                 {/* <Input
@@ -50,15 +50,26 @@ export default function TodoItem({todo, todoDelete, completeTodo, clickEnter, cl
                 </Input> */}
                 <form 
                     className={classes.root}
-                    onDoubleClick={() => clickForm()}
-                    onKeyDown={(e) => clickEsc(e, todo, setChangeTitle)}
+                    onDoubleClick={() => setBoolVal(false)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                            clickEsc(e, todo, setChangeTitle)
+                            setBoolVal(true)
+                        }
+                    }}
                 >
                     <Box width='608px' p={2} >
                         { (boolVal) 
                         ? <Typography className={classes.title} >{changeTitle}</Typography>
                         : <TextField 
                             className={classes.input}
-                            onKeyPress={(e) => clickEnter(e, changeTitle, todo, setChangeTitle)} 
+                            onBlur={() => setBoolVal(true)}
+                            onKeyPress={(e) => {
+                                if(boolVal === false && e.key === 'Enter') {
+                                    clickEnter(changeTitle, todo)
+                                    setBoolVal(true)
+                                }
+                            }} 
                             onChange={(e) => changeText(todo, e)} 
                             value={changeTitle} 
                             label="Outlined" 
