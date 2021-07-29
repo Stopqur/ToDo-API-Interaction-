@@ -19,12 +19,12 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export default function TodoItem({ todo, todoComplete, todoDelete, changeText, currentText }) {
+export default function TodoItem({ todo, todoComplete, todoDelete, changeText, currentText, editTodo }) {
 
     const classes = useStyles();
     
     const [changeTitle, setChangeTitle] = useState(todo.name)
-    const [changeTag, setChangeTag] = useState(true)
+    const [editField, setEditField] = useState(true)
 
     function change (e) {
         setChangeTitle(e.target.value)
@@ -37,32 +37,32 @@ export default function TodoItem({ todo, todoComplete, todoDelete, changeText, c
                     id={todo.uuid} 
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={() => todoComplete(todo)}
+                    onChange={() => editTodo(todo, todo.name, !todo.done)}
                     checked={todo.done}
                 />
                 <form 
                     className={classes.root}
                     onDoubleClick={(e) => {
-                        setChangeTag(false)
+                        setEditField(false)
                         console.log(todo)
                     }}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
                             currentText(e, todo, setChangeTitle)
-                            setChangeTag(true)
+                            setEditField(true)
                         }
                     }}
                 >
                     <Box width='608px' p={2} >
-                        { (changeTag) 
+                        { (editField) 
                         ? <Typography className={classes.title} >{changeTitle}</Typography>
                         : <TextField 
                             className={classes.input}
-                            onBlur={() => setChangeTag(true)}
+                            onBlur={() => setEditField(true)}
                             onKeyPress={(e) => {
-                                if(changeTag === false && e.key === 'Enter') {
-                                    changeText(changeTitle, todo)
-                                    setChangeTag(true)
+                                if(editField === false && e.key === 'Enter') {
+                                    editTodo(todo, changeTitle, todo.done)
+                                    setEditField(true)
                                 }
                             }} 
                             onChange={(e) => change(e)} 

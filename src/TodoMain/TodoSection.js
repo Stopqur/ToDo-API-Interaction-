@@ -70,7 +70,8 @@ function TodoSection() {
 
     const getTodos = async (val) => {
         try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: (val || valSort) }})
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: (valSort) }})
+            val = ''
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
             console.log(val)
@@ -78,36 +79,30 @@ function TodoSection() {
             showSnackBar(err)
         }
     }
-
     
     const putTodos = async (id, newName, flag) => {
         try {
-            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !flag, name: newName})
+            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: flag, name: newName})
             getTodos('asc')
         } catch (err) {
             showSnackBar(err)
         }
     }
 
-    // function handleEditTodo () {
-    //     putTodos(task.uuid, )
-    // }
-    function handleTodoComplete (task) {
-        putTodos(task.uuid, task.name, task.done)
+
+
+    
+    function handleEditTodo (task, newTitle, flag) {
+        putTodos(task.uuid, newTitle, flag)
     }
 
-    function handleChangeText (task, newTitle) {
-        putTodos(task.uuid, newTitle, !task.done)
-    }
-
-
-    function handleAddItem (userInput, clearStr) {
+    function handleAddItem (userInput, clearInput) {
         const newItem = {
             name: userInput,
             done: false
         }
         postTodos(newItem)
-        clearStr('')
+        clearInput('')
         if (filterTodos.length > 2) {
             sliceTodosList(todos)
         }
@@ -187,12 +182,11 @@ function TodoSection() {
                     {filterTodos.map((todo) => {
                         return (
                             <TodoItem 
-                                todoComplete={handleTodoComplete}
                                 todoDelete={handleDeleteToDo}
                                 todo={todo} 
                                 key={todo.uuid}
-                                changeText={handleChangeText}
                                 currentText={handleCurrentText}
+                                editTodo={handleEditTodo}
                             />
                         )
                         })
