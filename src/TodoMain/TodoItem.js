@@ -37,8 +37,7 @@ export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, cl
                     id={todo.uuid} 
                     value="checkedA"
                     inputProps={{ 'aria-label': 'Checkbox A' }}
-                    onChange={(e) => (e.key === 'Enter') ? e.preventDefault() : todoComplete(todo)}
-                    onKeyPress={(e) => (e.key === 'Enter') ? e.preventDefault(): console.log('sfsfs')}
+                    onChange={() => todoComplete(todo)}
                     checked={todo.done}
                 />
                 {/* <Input
@@ -50,7 +49,7 @@ export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, cl
                 </Input> */}
                 <form 
                     className={classes.root}
-                    onDoubleClick={() => {
+                    onDoubleClick={(e) => {
                         setBoolVal(false)
                         console.log(todo)
                     }}
@@ -82,6 +81,7 @@ export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, cl
                                     color: "#f50057"
                                 }
                             }}
+                            autoFocus
                           />
                         }
                     </Box>

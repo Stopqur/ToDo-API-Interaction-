@@ -23,21 +23,13 @@ const useStyles = makeStyles(() => ({
 
 function TodoSection() {
     const classes = useStyles();
-
-    // const get = () => {
-    //     axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2')
-    //     .then(req => {
-    //         req.data
-    //         console.log(req.data)
-    //     }) 
-    // }
-    
     const [todos, setTodos] = useState([])
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
-    const [flagHideBtn, setFlagHideBtn] = useState(false)
     const [trackBug, setTrackBug] = useState('')
     const [openBar, setOpenBar] = useState(false);
+    const [valFilter, setValFilter] = useState('')
+    const [valSort, setValSort] = useState('asc')
     // console.log(' ========= Render todoSection', todos)
     const countTodoOnPage = 3    
 
@@ -78,9 +70,9 @@ function TodoSection() {
 //             return b.id - a.id
 //         }))
 //     }
-    const getRequest = async (valFilter) => {
+    const getRequest = async () => {
         try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: 'asc' }})
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: valSort }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
         } catch (err) {
@@ -90,28 +82,26 @@ function TodoSection() {
         }
     }
 
-    const getRequestSort = async (valSort) => {
-        try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { order: valSort }})
-            setTodos(dataGET.data)
-            sliceTodosList(dataGET.data)
-        } catch (err) {
-            setOpenBar(true)
-            setTrackBug(`${err}`)
-            console.log('GET function very bad written', err)
-        }
-    }
     
-    const putRequest = async (id, task, newName) => {
+    const putRequest = async (id, newName, flag) => {
         try {
-            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !task.done, name: newName})
+            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !flag, name: newName})
             // (task.done === true) ? getRequest('done') 
             getRequest()
+            setValSort('asc')
         } catch (err) {
             setOpenBar(true)
             setTrackBug(`${err}`)
             console.log('PUT trouble: ', err)
         }
+    }
+
+    function handleTodoComplete (task) {
+        putRequest(task.uuid, task.name, task.done)
+    }
+
+    function handleClickEnter (newTitle, task) {
+        putRequest(task.uuid, newTitle, !task.done)
     }
 
 
@@ -150,15 +140,18 @@ function TodoSection() {
 
     useEffect(() => {
         getRequest()
-    }, TodoSection)
+    }, [valFilter, valSort])
+
+    
+    // useEffect(() => {
+    //     getRequest()
+    // }, TodoSection)
 
 
 
 //Action definite Todo item    
 
-    function handleTodoComplete (task) {
-        putRequest(task.uuid, task)
-    }
+    
 
     const handleDeleteToDo = async (itemId) => {
         await deleteRequest(itemId)
@@ -176,16 +169,11 @@ function TodoSection() {
         }
     }
     
-    function handleClickEnter (newTitle, task) {
-        putRequest(task.uuid, task, newTitle)
-    }
-
-
 
 
 // Filtration
     const handleFilterMethod = (val) => {
-        getRequest(val)
+        setValFilter(val)
     }
 
 
@@ -193,7 +181,7 @@ function TodoSection() {
 
 //Sort
     function handleSort (val) {
-        getRequestSort(val)
+        setValSort(val)
     }
 
 
