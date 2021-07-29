@@ -1,14 +1,14 @@
-import React, {useState, useEffect, useCallback} from 'react'
-import { Typography, Button, Box, List, Snackbar } from '@material-ui/core';
+import React, {useState, useEffect, createRef} from 'react'
+import { Typography, Box, List, Snackbar } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
 import { makeStyles } from '@material-ui/core/styles'
 
-import TodoTitle from './TodoTitle'
 import TodoForm from './TodoForm'
 import Options from './Options'
 import TodoItem from './TodoItem'
 import Pagination from './Pagination'
+
 import axios from 'axios'
 
 const useStyles = makeStyles(() => ({
@@ -23,6 +23,7 @@ const useStyles = makeStyles(() => ({
 
 function TodoSection() {
     const classes = useStyles();
+
     const [todos, setTodos] = useState([])
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
@@ -30,7 +31,7 @@ function TodoSection() {
     const [openBar, setOpenBar] = useState(false);
     const [valFilter, setValFilter] = useState('')
     const [valSort, setValSort] = useState('asc')
-    // console.log(' ========= Render todoSection', todos)
+
     const countTodoOnPage = 3    
 
     function sliceTodosList(arrTodo) {
@@ -41,89 +42,78 @@ function TodoSection() {
 
   
 //REST API
-    const postRequest =  async (task) => {
+    const postTodos =  async (task) => {
         try {
             const dataPOST = await axios.post('https://todo-api-learning.herokuapp.com/v1/task/2', task)
             setTodos([...todos, dataPOST.data])
-            setFilterTodos([...filterTodos, dataPOST.data].slice(currentPage * 3 - 3, currentPage * 3))
+            sliceTodosList([...filterTodos, dataPOST.data])
             console.log('Very pretty code!!!', dataPOST)
         } catch (err) {
             setOpenBar(true)
-            setTrackBug(`${err}`)
-            console.log('It is wrong code!!!!!', typeof err)
+            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
+            console.log('It is wrong code!!!!!', err)
         }
     }
 
-    const deleteRequest = async (id) => {
+    const deleteTodos = async (id) => {
         try {
             await axios.delete(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`)
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
             setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
         } catch (err) {
             setOpenBar(true)
-            setTrackBug(`${err}`)
+            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
             console.log(`Troubles with delete task: ${err}`)
         }
     }
-// function handleSortEarlier () {
-//         setFilterTodos(filterTodos.sort(function(a, b) {
-//             return b.id - a.id
-//         }))
-//     }
-    const getRequest = async () => {
+
+    const getTodos = async () => {
         try {
             const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: valSort }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
         } catch (err) {
             setOpenBar(true)
-            setTrackBug(`${err}`)
+            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
             console.log('GET function very bad written', err)
         }
     }
 
     
-    const putRequest = async (id, newName, flag) => {
+    const putTodos = async (id, newName, flag) => {
         try {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !flag, name: newName})
-            // (task.done === true) ? getRequest('done') 
-            getRequest()
+            getTodos()
             setValSort('asc')
         } catch (err) {
             setOpenBar(true)
-            setTrackBug(`${err}`)
+            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
             console.log('PUT trouble: ', err)
         }
     }
 
     function handleTodoComplete (task) {
-        putRequest(task.uuid, task.name, task.done)
+        putTodos(task.uuid, task.name, task.done)
     }
 
-    function handleClickEnter (newTitle, task) {
-        putRequest(task.uuid, newTitle, !task.done)
+    function handleChangeText (newTitle, task) {
+        putTodos(task.uuid, newTitle, !task.done)
     }
 
 
-
-
-//Form actions
-    function handleAddItem (userInput, funcDelete) {
+    function handleAddItem (userInput, clearStr) {
         const newItem = {
             name: userInput,
             done: false
         }
-        postRequest(newItem)
-        funcDelete('')
+        postTodos(newItem)
+        clearStr('')
         if (filterTodos.length > 2) {
             sliceTodosList(todos)
         }
     }
 
 
-
-
-//Hook useEffect
     useEffect(() => {
         sliceTodosList(todos)
     }, [currentPage])
@@ -139,31 +129,20 @@ function TodoSection() {
     }, [filterTodos.length])
 
     useEffect(() => {
-        getRequest()
+        getTodos()
     }, [valFilter, valSort])
-
-    
-    // useEffect(() => {
-    //     getRequest()
-    // }, TodoSection)
-
-
-
-//Action definite Todo item    
-
     
 
     const handleDeleteToDo = async (itemId) => {
-        await deleteRequest(itemId)
+        await deleteTodos(itemId)
     }
     
 
     
-    function handleClickEsc (e, task, func) {
+    function handleReturnText (e, task, func) {
         if (e.key === 'Escape') {
             setFilterTodos([...filterTodos.map(todo => {
                 func(task.name)
-                // task.title = old
                 return todo
             })])
         }
@@ -171,28 +150,19 @@ function TodoSection() {
     
 
 
-// Filtration
     const handleFilterMethod = (val) => {
         setValFilter(val)
     }
 
-
-
-
-//Sort
     function handleSort (val) {
         setValSort(val)
     }
 
-
-
-
-//Pagination 
     function handlePaginationBtn (num) {
         setCurrentPage(num)
     }
     
-
+//Snackbar
     const handleClose = (reason) => {
         if (reason === 'clickaway') {
           return;
@@ -219,8 +189,8 @@ function TodoSection() {
                                 todoDelete={handleDeleteToDo}
                                 todo={todo} 
                                 key={todo.uuid}
-                                clickEnter={handleClickEnter}
-                                clickEsc={handleClickEsc}
+                                changeText={handleChangeText}
+                                returnText={handleReturnText}
                             />
                         )
                         })
@@ -237,11 +207,11 @@ function TodoSection() {
             />
             }
             <Snackbar 
-                open={openBar} 
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left',
                 }}
+                open={openBar} 
                 autoHideDuration={6000} 
                 onClose={handleClose}
             >

@@ -11,7 +11,7 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-export default function TodoForm({addTodo}) {
+export default function TodoForm({ addTodo }) {
 
     const classes = useStyles();
 

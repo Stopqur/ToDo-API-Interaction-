@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { ListItem, InputLabel, Checkbox, Button, Box, Typography, TextField } from '@material-ui/core';
+import { ListItem, Checkbox, Button, Box, Typography, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
 
@@ -19,16 +19,14 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, clickEsc }) {
+export default function TodoItem({ todo, todoComplete, todoDelete, changeText, returnText }) {
 
     const classes = useStyles();
     
     const [changeTitle, setChangeTitle] = useState(todo.name)
-    const [boolVal, setBoolVal] = useState(true)
+    const [changeTag, setChangeTag] = useState(true)
 
-    function changeText ( todo, e ) {
-        setChangeTitle(e.target.value)
-    }
+  
     
     return (
         <ListItem>
@@ -40,39 +38,32 @@ export default function TodoItem({todo, todoDelete, todoComplete, clickEnter, cl
                     onChange={() => todoComplete(todo)}
                     checked={todo.done}
                 />
-                {/* <Input
-                    id={todo.id.toString()} 
-                    type="checkbox" 
-                    onChange={() => completeTodo(todo.id)}
-                    checked={todo.completed}
-                >
-                </Input> */}
                 <form 
                     className={classes.root}
                     onDoubleClick={(e) => {
-                        setBoolVal(false)
+                        setChangeTag(false)
                         console.log(todo)
                     }}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
-                            clickEsc(e, todo, setChangeTitle)
-                            setBoolVal(true)
+                            returnText(e, todo, setChangeTitle)
+                            setChangeTag(true)
                         }
                     }}
                 >
                     <Box width='608px' p={2} >
-                        { (boolVal) 
+                        { (changeTag) 
                         ? <Typography className={classes.title} >{changeTitle}</Typography>
                         : <TextField 
                             className={classes.input}
-                            onBlur={() => setBoolVal(true)}
+                            onBlur={() => setChangeTag(true)}
                             onKeyPress={(e) => {
-                                if(boolVal === false && e.key === 'Enter') {
-                                    clickEnter(changeTitle, todo)
-                                    setBoolVal(true)
+                                if(changeTag === false && e.key === 'Enter') {
+                                    changeText(changeTitle, todo)
+                                    setChangeTag(true)
                                 }
                             }} 
-                            onChange={(e) => changeText(todo, e)} 
+                            onChange={(e) => setChangeTitle(e.target.value)} 
                             value={changeTitle} 
                             label="Outlined" 
                             variant="outlined"
