@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/ToDo-API-Interaction-/static/css/main.8351048c.chunk.css",
+    "main.js": "/ToDo-API-Interaction-/static/js/main.81451b43.chunk.js",
+    "main.js.map": "/ToDo-API-Interaction-/static/js/main.81451b43.chunk.js.map",
+    "runtime-main.js": "/ToDo-API-Interaction-/static/js/runtime-main.1c129a28.js",
+    "runtime-main.js.map": "/ToDo-API-Interaction-/static/js/runtime-main.1c129a28.js.map",
+    "static/js/2.565fa87c.chunk.js": "/ToDo-API-Interaction-/static/js/2.565fa87c.chunk.js",
+    "static/js/2.565fa87c.chunk.js.map": "/ToDo-API-Interaction-/static/js/2.565fa87c.chunk.js.map",
+    "static/js/3.fceca4a4.chunk.js": "/ToDo-API-Interaction-/static/js/3.fceca4a4.chunk.js",
+    "static/js/3.fceca4a4.chunk.js.map": "/ToDo-API-Interaction-/static/js/3.fceca4a4.chunk.js.map",
+    "index.html": "/ToDo-API-Interaction-/index.html",
+    "static/css/main.8351048c.chunk.css.map": "/ToDo-API-Interaction-/static/css/main.8351048c.chunk.css.map",
+    "static/js/2.565fa87c.chunk.js.LICENSE.txt": "/ToDo-API-Interaction-/static/js/2.565fa87c.chunk.js.LICENSE.txt",
+    "static/media/style.css": "/ToDo-API-Interaction-/static/media/daniel-leone-v7daTKlZzaw-unsplash.ac87005c.jpg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.1c129a28.js",
+    "static/js/2.565fa87c.chunk.js",
+    "static/css/main.8351048c.chunk.css",
+    "static/js/main.81451b43.chunk.js"
+  ]
+}
