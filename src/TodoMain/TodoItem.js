@@ -19,14 +19,16 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-export default function TodoItem({ todo, todoComplete, todoDelete, changeText, returnText }) {
+export default function TodoItem({ todo, todoComplete, todoDelete, changeText, currentText }) {
 
     const classes = useStyles();
     
     const [changeTitle, setChangeTitle] = useState(todo.name)
     const [changeTag, setChangeTag] = useState(true)
 
-  
+    function change (e) {
+        setChangeTitle(e.target.value)
+    }
     
     return (
         <ListItem>
@@ -46,7 +48,7 @@ export default function TodoItem({ todo, todoComplete, todoDelete, changeText, r
                     }}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
-                            returnText(e, todo, setChangeTitle)
+                            currentText(e, todo, setChangeTitle)
                             setChangeTag(true)
                         }
                     }}
@@ -63,7 +65,7 @@ export default function TodoItem({ todo, todoComplete, todoDelete, changeText, r
                                     setChangeTag(true)
                                 }
                             }} 
-                            onChange={(e) => setChangeTitle(e.target.value)} 
+                            onChange={(e) => change(e)} 
                             value={changeTitle} 
                             label="Outlined" 
                             variant="outlined"

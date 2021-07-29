@@ -1,4 +1,4 @@
-import React, {useState, useEffect, createRef} from 'react'
+import React, {useState, useEffect } from 'react'
 import { Typography, Box, List, Snackbar } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
@@ -28,7 +28,7 @@ function TodoSection() {
     const [filterTodos, setFilterTodos] = useState([...todos])
     const [currentPage, setCurrentPage] = useState(1)
     const [trackBug, setTrackBug] = useState('')
-    const [openBar, setOpenBar] = useState(false);
+    const [openError, setOpenError] = useState(false);
     const [valFilter, setValFilter] = useState('')
     const [valSort, setValSort] = useState('asc')
 
@@ -40,6 +40,11 @@ function TodoSection() {
         setFilterTodos(arrTodo.slice(firstIdTask, lastIdTask))
     }
 
+    function showSnackBar(error) {
+        setOpenError(true)
+        setTrackBug(`${`${error}`.slice(0, 6) + ' ' + `${error}`.slice(39, 42)}`)
+    }
+
   
 //REST API
     const postTodos =  async (task) => {
@@ -49,9 +54,7 @@ function TodoSection() {
             sliceTodosList([...filterTodos, dataPOST.data])
             console.log('Very pretty code!!!', dataPOST)
         } catch (err) {
-            setOpenBar(true)
-            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
-            console.log('It is wrong code!!!!!', err)
+            showSnackBar(err)
         }
     }
 
@@ -61,21 +64,18 @@ function TodoSection() {
             setTodos([...todos.filter(todo => todo.uuid !== id) ])
             setFilterTodos([...filterTodos.filter(todo => todo.uuid !== id) ])
         } catch (err) {
-            setOpenBar(true)
-            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
-            console.log(`Troubles with delete task: ${err}`)
+            showSnackBar(err)
         }
     }
 
-    const getTodos = async () => {
+    const getTodos = async (val) => {
         try {
-            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: valSort }})
+            const dataGET = await axios.get('https://todo-api-learning.herokuapp.com/v1/tasks/2', {params: { filterBy: valFilter, order: (val || valSort) }})
             setTodos(dataGET.data)
             sliceTodosList(dataGET.data)
+            console.log(val)
         } catch (err) {
-            setOpenBar(true)
-            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
-            console.log('GET function very bad written', err)
+            showSnackBar(err)
         }
     }
 
@@ -83,20 +83,20 @@ function TodoSection() {
     const putTodos = async (id, newName, flag) => {
         try {
             const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: !flag, name: newName})
-            getTodos()
-            setValSort('asc')
+            getTodos('asc')
         } catch (err) {
-            setOpenBar(true)
-            setTrackBug(`${`${err}`.slice(0, 6) + ' ' + `${err}`.slice(39, 42)}`)
-            console.log('PUT trouble: ', err)
+            showSnackBar(err)
         }
     }
 
+    // function handleEditTodo () {
+    //     putTodos(task.uuid, )
+    // }
     function handleTodoComplete (task) {
         putTodos(task.uuid, task.name, task.done)
     }
 
-    function handleChangeText (newTitle, task) {
+    function handleChangeText (task, newTitle) {
         putTodos(task.uuid, newTitle, !task.done)
     }
 
@@ -112,6 +112,8 @@ function TodoSection() {
             sliceTodosList(todos)
         }
     }
+
+
 
 
     useEffect(() => {
@@ -139,7 +141,7 @@ function TodoSection() {
     
 
     
-    function handleReturnText (e, task, func) {
+    function handleCurrentText (e, task, func) {
         if (e.key === 'Escape') {
             setFilterTodos([...filterTodos.map(todo => {
                 func(task.name)
@@ -167,7 +169,7 @@ function TodoSection() {
         if (reason === 'clickaway') {
           return;
         }
-        setOpenBar(false);
+        setOpenError(false);
     };
       
 
@@ -190,7 +192,7 @@ function TodoSection() {
                                 todo={todo} 
                                 key={todo.uuid}
                                 changeText={handleChangeText}
-                                returnText={handleReturnText}
+                                currentText={handleCurrentText}
                             />
                         )
                         })
@@ -211,7 +213,7 @@ function TodoSection() {
                     vertical: 'bottom',
                     horizontal: 'left',
                 }}
-                open={openBar} 
+                open={openError} 
                 autoHideDuration={6000} 
                 onClose={handleClose}
             >
