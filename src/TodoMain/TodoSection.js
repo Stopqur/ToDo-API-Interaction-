@@ -82,7 +82,7 @@ function TodoSection() {
     
     const putTodos = async (id, newName, flag) => {
         try {
-            const dataPUT = await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: flag, name: newName})
+            await axios.patch(`https://todo-api-learning.herokuapp.com/v1/task/2/${id}`, {done: flag, name: newName})
             getTodos('asc')
         } catch (err) {
             showSnackBar(err)
